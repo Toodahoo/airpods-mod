@@ -193,7 +193,7 @@ simulation_elem_names = [
 	'LITH',
 	'RSST',
 	'RSSS',
-        'AIRP'
+	'AIRP'
 ]
 
 simulation_elem_src = []
