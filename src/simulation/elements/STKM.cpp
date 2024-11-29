@@ -1,6 +1,9 @@
 #include "simulation/ElementCommon.h"
 #include "STKM.h"
 
+#define AIRP_VIBE_F 0.15f
+#define AIRP_TEMPO 40
+
 static int update(UPDATE_FUNC_ARGS);
 static void create(ELEMENT_CREATE_FUNC_ARGS);
 static bool createAllowed(ELEMENT_CREATE_ALLOWED_FUNC_ARGS);
@@ -447,6 +450,24 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 	{
 		ry -= 2 * sim->rng.between(0, 1) + 1;
 		r = pmap[ry][rx];
+		if (playerp->elem == PT_AIRP)
+		{
+			int looptick = sim->currentTick % AIRP_TEMPO;
+			float looptime = 6.283185307f * (float(looptick)/AIRP_TEMPO);
+			float xaccel = AIRP_VIBE_F*(
+					1.5f*cos(looptime) - cos(3.0f*looptime)/3.0f);
+			float yaccel = AIRP_VIBE_F*(-1.0f*cos(2.0f * looptime));
+			if (!(looptick % int((AIRP_TEMPO+1)/2))) // pop feet off ground to the beat
+			{
+				playerp->legs[5] -= 1;
+				playerp->legs[13] -= 1;
+				parts[i].vy += 1;
+			}
+
+			parts[i].vx += xaccel;
+			parts[i].vy += yaccel;
+		}
+		else
 		if (elements[TYP(r)].Properties&TYPE_SOLID)
 		{
 			sim->create_part(-1, rx, ry, PT_SPRK);
